@@ -56,9 +56,7 @@ Note:
       [{"inputs":[],"name":"retrieve","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"num","type":"uint256"}],"name":"store","outputs":[],"stateMutability":"nonpayable","type":"function"}]
       ```
 
-
-
-2. Below Binary is the bin of the contract, which is bytecode, and after ABI is the abi compiled by the contract.
+    2. Below Binary is the bin of the contract, which is bytecode, and after ABI is the abi compiled by the contract.
 
 3. After the result is obtained, the bytecode is stored in a file, and the abi is also stored in another file (note that it is an empty file), such as Storage.bin and Storage.abi in the project
 
@@ -100,22 +98,20 @@ Note:
          }
          ```
 
+        2. The result is as follows
 
-
-      2. The result is as follows
-      
-         1. ```go
+            1. ```go
             API server listening at: [::]:41549
             === RUN   TestAccount
             privateKey:  50014d49478a00f62f775e015e389bd73dede68726a14d4f8b28253165bff23a
             address:  0x2aE433ae1C9e34BdD48296fB7BCFE8a6E60c7d38
             ```
-      
-      3. After the address is created go to [Tap Link](https://www.thinkiumdev.net/DApp%20Development/Faucet.html)take the test
-      tkm
 
-2. Transfer function (main currency tkm transfer)
-    1. ```go
+        3. After the address is created go to [Tap Link](https://www.thinkiumdev.net/DApp%20Development/Faucet.html)take the test
+           tkm
+
+    2. Transfer function (main currency tkm transfer)
+        1. ```go
          func TestSendTransaction(t *testing.T) {
          	// change to your rpc provider
          	web3, err := web3.NewWeb3(eth.RPC_URL)
@@ -146,10 +142,8 @@ Note:
          }
          ```
 
-
-
-      2. The result is as follows:
-         1. ```go
+        2. The result is as follows:
+            1. ```go
             API server listening at: [::]:38469
             === RUN   TestSendTransaction
             balance:  97315968400000000000
@@ -159,59 +153,59 @@ Note:
             PASS
             ```
 
-3. deploy contract
+    3. deploy contract
 
-    1.
+        1.
 
-    ```go
-     func TestDeployContract(t *testing.T)  {
-        // change to your rpc provider
-        web3, err := web3.NewWeb3(eth.RPC_URL)
-        if err != nil {
-            panic(err)
+        ```go
+         func TestDeployContract(t *testing.T)  {
+            // change to your rpc provider
+            web3, err := web3.NewWeb3(eth.RPC_URL)
+            if err != nil {
+                panic(err)
+            }
+            privateKey, err := crypto.HexToECDSA("c1f14e4132c1858b390ff169dd045082b9ba1ca022de641e7aa24b0322510499")
+            if err != nil {
+                panic(err)
+            }
+        
+            publicKey := privateKey.Public()
+            publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+            if !ok {
+                fmt.Println("error casting public key to ECDSA")
+            }
+        
+            fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+            nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+            if err != nil {
+                panic(err)
+            }
+        
+            gasPrice, err := client.SuggestGasPrice(context.Background())
+            if err != nil {
+                panic(err)
+            }
+            //set chainID
+            auth, err  := bind.NewKeyedTransactorWithChainID(privateKey,new(big.Int).SetInt64(50001))
+            if err != nil {
+                panic(err)
+            }
+            auth.Nonce = big.NewInt(int64(nonce))
+            auth.Value = big.NewInt(0)     // in wei
+            auth.GasLimit = uint64(300000) // in units
+            auth.GasPrice = gasPrice
+            address, tx, instance, err :=DeployMain(auth,client)
+            if err != nil {
+                panic(err)
+            }
+            fmt.Println("contract:"+address.Hex())
+            fmt.Println("deploy hash:"+tx.Hash().String())
+            _, _ = instance, tx
         }
-        privateKey, err := crypto.HexToECDSA("c1f14e4132c1858b390ff169dd045082b9ba1ca022de641e7aa24b0322510499")
-        if err != nil {
-            panic(err)
-        }
-    
-        publicKey := privateKey.Public()
-        publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-        if !ok {
-            fmt.Println("error casting public key to ECDSA")
-        }
-    
-        fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-        nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-        if err != nil {
-            panic(err)
-        }
-    
-        gasPrice, err := client.SuggestGasPrice(context.Background())
-        if err != nil {
-            panic(err)
-        }
-        //set chainID
-        auth, err  := bind.NewKeyedTransactorWithChainID(privateKey,new(big.Int).SetInt64(50001))
-        if err != nil {
-            panic(err)
-        }
-        auth.Nonce = big.NewInt(int64(nonce))
-        auth.Value = big.NewInt(0)     // in wei
-        auth.GasLimit = uint64(300000) // in units
-        auth.GasPrice = gasPrice
-        address, tx, instance, err :=DeployMain(auth,client)
-        if err != nil {
-            panic(err)
-        }
-        fmt.Println("contract:"+address.Hex())
-        fmt.Println("deploy hash:"+tx.Hash().String())
-        _, _ = instance, tx
-    }
-    ```
+        ```
 
-    2. To get the contract address, subsequent operations need to use the contract address, test execution, and get the contract address as0x63C21800Fc7970D796811ac21d5ca42688382195，The result is as follows
-        1. ```go
+        2. To get the contract address, subsequent operations need to use the contract address, test execution, and get the contract address as0x63C21800Fc7970D796811ac21d5ca42688382195，The result is as follows
+            1. ```go
             API server listening at: [::]:38869
             === RUN   TestDeployContract
             contract:0x63C21800Fc7970D796811ac21d5ca42688382195
@@ -220,10 +214,8 @@ Note:
             PASS
             ```
 
-
-
-4. contract call
-    1. ```go
+    4. contract call
+        1. ```go
          func TestCallContract(t *testing.T) {
          
          	// change to your rpc provider
