@@ -22,15 +22,20 @@ Note:
 #### Project construction
 
 1. Clone the base project with git
+
 2. configure abigen
-    1. ```shell
-      go get -u github.com/ethereum/go-ethereum
-      cd $GOPATH/src/github.com/ethereum/go-ethereum/
-      make
-      make devtools
-      ```
-    2. Note: protoc needs to be installed in advance. The tools generated after make devtools are completed are in $GOPATH/bin/abigen, and the path is introduced into the system variable PATH to test the command
+
+   ```shell
+   go get -u github.com/ethereum/go-ethereum
+   cd $GOPATH/src/github.com/ethereum/go-ethereum/
+   make
+   make devtools
+   ```
+
+   Note: protoc needs to be installed in advance. The tools generated after make devtools are completed are in $GOPATH/bin/abigen, and the path is introduced into the system variable PATH to test the command
+
 3. Initialize the project
+
 4. Project Structure Analysis
     1. The RPC_URL in the const of eth in eth is the RPC address
     2. examples
