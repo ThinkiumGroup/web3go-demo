@@ -6,9 +6,9 @@
  	2. Understand contracts and perform contract-related operations on the chain
  	3. Interact with the chain using golang
 
-Note:
-1.The testrpc in this article is https://test1.thinkiumrpc.net, also has other available test RPCs as follows https://test2.thinkiumrpc.net、https://test103.thinkiumrpc.net ,Readers can choose by themselves.
-2.The source code clone address of this article is https://github.com/ThinkiumGroup/web3go-demo.git
+Note: 
+	1.The testrpc in this article is https://test1.thinkiumrpc.net, also has other available test RPCs as follows https://test2.thinkiumrpc.net、https://test103.thinkiumrpc.net ,Readers can choose by themselves.
+	2.The source code clone address of this article is https://github.com/ThinkiumGroup/web3go-demo.git
 
 #### Basic Environment and Tools
 
@@ -24,35 +24,35 @@ Note:
 1. Clone the base project with git
 
 2. configure abigen
-
+   
    ```shell
    go get -u github.com/ethereum/go-ethereum
    cd $GOPATH/src/github.com/ethereum/go-ethereum/
    make
    make devtools
    ```
-
+   
    Note: protoc needs to be installed in advance. The tools generated after make devtools are completed are in $GOPATH/bin/abigen, and the path is introduced into the system variable PATH to test the command
-
+   
 3. Initialize the project
 
 4. Project Structure Analysis
-    1. The RPC_URL in the const of eth in eth is the RPC address
-    2. examples
-        1. account contains test methods for creating wallets and main currency transfers
-        2. chain contains the test method for querying the current block height
-        3. contract
-            1. Contains deploy and call contract test methods
-            2. storage.go is the generated file (details can be viewed below)
-    3. lib is the go file generated using bin and abi
-    4. The bin and abi in the storage in resources use solc to compile the sol file, which is the source file for this test
+   1. The RPC_URL in the const of eth in eth is the RPC address
+   2. examples
+      1. account contains test methods for creating wallets and main currency transfers
+      2. chain contains the test method for querying the current block height
+      3. contract
+         1. Contains deploy and call contract test methods
+         2. storage.go is the generated file (details can be viewed below)
+   3. lib is the go file generated using bin and abi
+   4. The bin and abi in the storage in resources use solc to compile the sol file, which is the source file for this test
 
 #### test preparation
 
 1. First prepare a Solidity source code file, this test file - Storage.sol in Storage in the project resource
 
 2. Then use solc to compile the file to generate data (refer to the command: sudo solc --bin --abi Storage.sol), the results are as follows
-    1. ```shell
+    ```shell
        solc --bin  --abi Storage.sol
       ======= Storage.sol:Storage =======
       Binary:
@@ -60,16 +60,16 @@ Note:
       Contract JSON ABI
       [{"inputs":[],"name":"retrieve","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"num","type":"uint256"}],"name":"store","outputs":[],"stateMutability":"nonpayable","type":"function"}]
       ```
-
-    2. Below Binary is the bin of the contract, which is bytecode, and after ABI is the abi compiled by the contract.
-
+   
+   Below Binary is the bin of the contract, which is bytecode, and after ABI is the abi compiled by the contract.
+   
 3. After the result is obtained, the bytecode is stored in a file, and the abi is also stored in another file (note that it is an empty file), such as Storage.bin and Storage.abi in the project
 
 4. Use abigen to compile the file to generate the go class file, the command is as follows
-    1. ```hell
+    ```shell
       sudo abigen --abi=Storage.abi --bin=Storage.bin --pkg=main --out=storage.go
       ```
-
+   
 6. At this point, the preparation work is complete, and then start the test
 
 #### test process
@@ -77,8 +77,8 @@ Note:
 1. First determine the Rpc address in the calling package
 
 2. included in the project
-    1. wallet creation
-        1. ```go
+   1. wallet creation
+      1. ```go
          func TestAccount(t *testing.T) {
          	//get account
          	pv, err := crypto.GenerateKey()
@@ -102,21 +102,21 @@ Note:
          	fmt.Println("address: ", web3.Eth.Address())
          }
          ```
-
-        2. The result is as follows
-
-            1. ```go
+         
+      2. The result is as follows
+      
+         1. ```go
             API server listening at: [::]:41549
             === RUN   TestAccount
             privateKey:  50014d49478a00f62f775e015e389bd73dede68726a14d4f8b28253165bff23a
             address:  0x2aE433ae1C9e34BdD48296fB7BCFE8a6E60c7d38
             ```
-
-        3. After the address is created go to [Tap Link](https://www.thinkiumdev.net/DApp%20Development/Faucet.html)take the test
-           tkm
-
-    2. Transfer function (main currency tkm transfer)
-        1. ```go
+      
+      3. After the address is created go to [Tap Link](https://www.thinkiumdev.net/DApp%20Development/Faucet.html)take the test
+      tkm
+      
+   2. Transfer function (main currency tkm transfer)
+      1. ```go
          func TestSendTransaction(t *testing.T) {
          	// change to your rpc provider
          	web3, err := web3.NewWeb3(eth.RPC_URL)
@@ -146,9 +146,9 @@ Note:
          	fmt.Println("hash: ", hash)
          }
          ```
-
-        2. The result is as follows:
-            1. ```go
+         
+      2. The result is as follows:
+         1. ```go
             API server listening at: [::]:38469
             === RUN   TestSendTransaction
             balance:  97315968400000000000
@@ -157,60 +157,60 @@ Note:
             --- PASS: TestSendTransaction (0.05s)
             PASS
             ```
-
-    3. deploy contract
-
-        1.
-
-        ```go
-         func TestDeployContract(t *testing.T)  {
-            // change to your rpc provider
-            web3, err := web3.NewWeb3(eth.RPC_URL)
-            if err != nil {
-                panic(err)
-            }
-            privateKey, err := crypto.HexToECDSA("c1f14e4132c1858b390ff169dd045082b9ba1ca022de641e7aa24b0322510499")
-            if err != nil {
-                panic(err)
-            }
-        
-            publicKey := privateKey.Public()
-            publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-            if !ok {
-                fmt.Println("error casting public key to ECDSA")
-            }
-        
-            fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-            nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-            if err != nil {
-                panic(err)
-            }
-        
-            gasPrice, err := client.SuggestGasPrice(context.Background())
-            if err != nil {
-                panic(err)
-            }
-            //set chainID
-            auth, err  := bind.NewKeyedTransactorWithChainID(privateKey,new(big.Int).SetInt64(50001))
-            if err != nil {
-                panic(err)
-            }
-            auth.Nonce = big.NewInt(int64(nonce))
-            auth.Value = big.NewInt(0)     // in wei
-            auth.GasLimit = uint64(300000) // in units
-            auth.GasPrice = gasPrice
-            address, tx, instance, err :=DeployMain(auth,client)
-            if err != nil {
-                panic(err)
-            }
-            fmt.Println("contract:"+address.Hex())
-            fmt.Println("deploy hash:"+tx.Hash().String())
-            _, _ = instance, tx
-        }
-        ```
-
-        2. To get the contract address, subsequent operations need to use the contract address, test execution, and get the contract address as0x63C21800Fc7970D796811ac21d5ca42688382195，The result is as follows
-            1. ```go
+      
+   3. deploy contract
+      
+      1. 
+      
+         ```go
+          func TestDeployContract(t *testing.T)  {
+         	// change to your rpc provider
+         	web3, err := web3.NewWeb3(eth.RPC_URL)
+         	if err != nil {
+         		panic(err)
+         	}
+         	privateKey, err := crypto.HexToECDSA("c1f14e4132c1858b390ff169dd045082b9ba1ca022de641e7aa24b0322510499")
+         	if err != nil {
+         		panic(err)
+         	}
+         
+         	publicKey := privateKey.Public()
+         	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+         	if !ok {
+         		fmt.Println("error casting public key to ECDSA")
+         	}
+         
+         	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+         	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+         	if err != nil {
+         		panic(err)
+         	}
+         
+         	gasPrice, err := client.SuggestGasPrice(context.Background())
+         	if err != nil {
+         		panic(err)
+         	}
+         	//set chainID
+         	auth, err  := bind.NewKeyedTransactorWithChainID(privateKey,new(big.Int).SetInt64(50001))
+         	if err != nil {
+         		panic(err)
+         	}
+         	auth.Nonce = big.NewInt(int64(nonce))
+         	auth.Value = big.NewInt(0)     // in wei
+         	auth.GasLimit = uint64(300000) // in units
+         	auth.GasPrice = gasPrice
+         	address, tx, instance, err :=DeployMain(auth,client)
+         	if err != nil {
+         		panic(err)
+         	}
+         	fmt.Println("contract:"+address.Hex())
+         	fmt.Println("deploy hash:"+tx.Hash().String())
+         	_, _ = instance, tx
+         }
+         ```
+      
+      2. To get the contract address, subsequent operations need to use the contract address, test execution, and get the contract address as0x63C21800Fc7970D796811ac21d5ca42688382195，The result is as follows
+         1. ```go
             API server listening at: [::]:38869
             === RUN   TestDeployContract
             contract:0x63C21800Fc7970D796811ac21d5ca42688382195
@@ -218,9 +218,9 @@ Note:
             --- PASS: TestDeployContract (0.04s)
             PASS
             ```
-
-    4. contract call
-        1. ```go
+      
+   4. contract call
+      1. ```go
          func TestCallContract(t *testing.T) {
          
          	// change to your rpc provider
@@ -277,18 +277,18 @@ Note:
          }
          
          ```
-
-        2. In the above method, we implemented 2 methods, namely read and write
-            1. After NewMain, you can perform some operations on the contract
-
-            2. Get the default variable value set by the contract main.Retrieve(nil) This is the read method
-
-            3. main.Store(auth, new(big.Int).SetInt64(10)) resets the value in the contract, which is the writing method
-
-            4. Note: In the middle sleep time, because the transaction needs to be confirmed, it is not possible to read directly after writing.
-
-            5. The result is as follows
-                1. ```go
+         
+      2. In the above method, we implemented 2 methods, namely read and write
+         1. After NewMain, you can perform some operations on the contract
+         
+         2. Get the default variable value set by the contract main.Retrieve(nil) This is the read method
+         
+         3. main.Store(auth, new(big.Int).SetInt64(10)) resets the value in the contract, which is the writing method
+         
+         4. Note: In the middle sleep time, because the transaction needs to be confirmed, it is not possible to read directly after writing.
+         
+         5. The result is as follows
+            1. ```go
                API server listening at: [::]:40991
                === RUN   TestCallContract
                num:100
@@ -296,9 +296,9 @@ Note:
                --- PASS: TestCallContract (5.06s)
                PASS
                ```
-
-
-
+            
+               
+            
             2. It can be clearly seen that the default value is 100, and the query after writing is 1000
 
 
@@ -307,6 +307,6 @@ Note:
 
 The above is the simple process and method of using golang to interact with the thinkium chain. I hope you have a happy programming!
 
-​
+​		
 
 ​								
