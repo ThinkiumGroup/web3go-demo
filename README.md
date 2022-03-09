@@ -273,15 +273,17 @@ Note:
          
          ```
 
+        2. In the above method, we implemented 2 methods, namely read and write
+            1. After NewMain, you can perform some operations on the contract
 
+            2. Get the default variable value set by the contract main.Retrieve(nil) This is the read method
 
-      2. In the above method, we implemented 2 methods, namely read and write
-         1. After NewMain, you can perform some operations on the contract
-         2. Get the default variable value set by the contract main.Retrieve(nil) This is the read method
-         3. main.Store(auth, new(big.Int).SetInt64(10)) resets the value in the contract, which is the writing method
-         4. Note: In the middle sleep time, because the transaction needs to be confirmed, it is not possible to read directly after writing.
-         5. The result is as follows
-            1. ```go
+            3. main.Store(auth, new(big.Int).SetInt64(10)) resets the value in the contract, which is the writing method
+
+            4. Note: In the middle sleep time, because the transaction needs to be confirmed, it is not possible to read directly after writing.
+
+            5. The result is as follows
+                1. ```go
                API server listening at: [::]:40991
                === RUN   TestCallContract
                num:100
@@ -289,9 +291,9 @@ Note:
                --- PASS: TestCallContract (5.06s)
                PASS
                ```
-            
-               
-            
+
+
+
             2. It can be clearly seen that the default value is 100, and the query after writing is 1000
 
 
